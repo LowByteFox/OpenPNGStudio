@@ -1,46 +1,27 @@
-//! By convention, main.zig is where your main function lives in the case that
-//! you are building an executable. If you are making a library, the convention
-//! is to delete this file and start with root.zig instead.
+const std = @import("std");
+const mask = @import("core/mask.zig");
+const rl = @import("raylib");
 
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    const screenWidth = 800;
+    const screenHeight = 450;
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    rl.InitWindow(screenWidth, screenHeight, "raylib-zig [core] example - basic window");
+    defer rl.CloseWindow();
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    rl.SetTargetFPS(60);
+    _ = mask.compare_mask(0);
 
-    try bw.flush(); // Don't forget to flush!
+    while (!rl.WindowShouldClose()) {
+        mask.update_mask();
+
+        std.debug.print("{b:064}\n", .{mask.get_mask()});
+
+        rl.BeginDrawing();
+        defer rl.EndDrawing();
+
+        rl.ClearBackground(rl.WHITE);
+
+        rl.DrawText("Uwu! You created your first window!", 190, 200, 20, rl.LIGHTGRAY);
+    }
 }
-
-test "simple test" {
-    var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // Try commenting this out and see if zig detects the memory leak!
-    try list.append(42);
-    try std.testing.expectEqual(@as(i32, 42), list.pop());
-}
-
-test "use other module" {
-    try std.testing.expectEqual(@as(i32, 150), lib.add(100, 50));
-}
-
-test "fuzz example" {
-    const Context = struct {
-        fn testOne(context: @This(), input: []const u8) anyerror!void {
-            _ = context;
-            // Try passing `--fuzz` to `zig build test` and see if it manages to fail this test case!
-            try std.testing.expect(!std.mem.eql(u8, "canyoufindme", input));
-        }
-    };
-    try std.testing.fuzz(Context{}, Context.testOne, .{});
-}
-
-const std = @import("std");
-
-/// This imports the separate module containing `root.zig`. Take a look in `build.zig` for details.
-const lib = @import("OpenPNGStudio_lib");
