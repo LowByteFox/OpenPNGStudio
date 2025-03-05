@@ -1,4 +1,4 @@
-src/vendor/*
+_src/vendor/*
 include/vendor/*
 build/
 build-mingw/
