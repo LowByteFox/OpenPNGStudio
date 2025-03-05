@@ -1,4 +1,6 @@
 _src/vendor/*
+zig-out/
+.zig-cache/
 include/vendor/*
 build/
 build-mingw/
