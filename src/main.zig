@@ -1,27 +1,40 @@
 const std = @import("std");
-const mask = @import("core/mask.zig");
-const rl = @import("raylib");
+const path = @import("core/path.zig");
+// const mask = @import("core/mask.zig");
+// const rl = @import("raylib");
 
 pub fn main() !void {
-    const screenWidth = 800;
-    const screenHeight = 450;
+    var dbg_alloc = std.heap.DebugAllocator(.{}).init;
+    defer _ = dbg_alloc.detectLeaks();
+    const allocator = dbg_alloc.allocator();
 
-    rl.InitWindow(screenWidth, screenHeight, "raylib-zig [core] example - basic window");
-    defer rl.CloseWindow();
+    var pth = path.Path.init(allocator);
+    try pth.append_dir("home");
+    try pth.append_dir("jany");
+    try pth.append_file("Rose");
 
-    rl.SetTargetFPS(60);
-    _ = mask.compare_mask(0);
+    std.debug.print("{any}\n", .{try pth.stringify()});
 
-    while (!rl.WindowShouldClose()) {
-        mask.update_mask();
+    return;
+    // const screenWidth = 800;
+    // const screenHeight = 450;
 
-        std.debug.print("{b:064}\n", .{mask.get_mask()});
+    // rl.InitWindow(screenWidth, screenHeight, "raylib-zig [core] example - basic window");
+    // defer rl.CloseWindow();
 
-        rl.BeginDrawing();
-        defer rl.EndDrawing();
+    // rl.SetTargetFPS(60);
+    // _ = mask.compare_mask(0);
 
-        rl.ClearBackground(rl.WHITE);
+    // while (!rl.WindowShouldClose()) {
+    //     mask.update_mask();
 
-        rl.DrawText("Uwu! You created your first window!", 190, 200, 20, rl.LIGHTGRAY);
-    }
+    //     std.debug.print("{b:064}\n", .{mask.get_mask()});
+
+    //     rl.BeginDrawing();
+    //     defer rl.EndDrawing();
+
+    //     rl.ClearBackground(rl.WHITE);
+
+    //     rl.DrawText("Uwu! You created your first window!", 190, 200, 20, rl.LIGHTGRAY);
+    // }
 }
