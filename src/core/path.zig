@@ -16,7 +16,7 @@
 
 const std = @import("std");
 const builtin = @import("builtin");
-const assert = std.debug.assert;
+const builder = @import("string_builder.zig");
 
 const PathNode = struct {
     name: []u8,
@@ -83,35 +83,26 @@ pub const Path = struct {
     }
 
     pub fn stringify(self: *Self) ![]u8 {
-        const buffer = try self.allocator.alloc(u8, self.buf_size());
-        const offset = blk: {
-            switch (builtin.target.os.tag) {
-                .windows => {
-                    @memcpy(buffer[0..2], "C:");
-                    break :blk 2;
-                },
-                else => {
-                    buffer[0] = '/';
-                    break :blk 1;
-                }
-            }
-        };
+        var s_builder = builder.StringBuilder.init(self.allocator);
 
-        var index: usize = offset;
+        switch (builtin.target.os.tag) {
+            .windows => try s_builder.appendString("C:"),
+            else => try s_builder.appendChar('/'),
+        }
 
         var iter = self.builder.first;
 
         while (iter) |i| : (iter = i.next) {
-            @memcpy(buffer[index..index + i.data.name.len], i.data.name);
-            index += i.data.name.len;
+            try s_builder.appendString(i.data.name);
 
             if (!i.data.is_file) {
-                buffer[index] = '/';
-                index += 1;
+                try s_builder.appendChar(std.fs.path.sep);
             }
         }
 
-        return buffer;
+        try s_builder.shrinkToFit();
+
+        return s_builder.getString();
     }
 
     fn buf_size(self: *const Self) usize {
