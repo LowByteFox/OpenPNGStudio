@@ -121,7 +121,7 @@ pub fn compare_mask(target: mask) bool {
         }
     }
 
-    var has_key: i32 = -1;
+    var has_key: isize = -1;
     for (0..27) |i| {
         const bit: mask = @as(mask, 1) << @intCast((i + KEY_START));
         if (target & bit != 0) {
@@ -131,7 +131,7 @@ pub fn compare_mask(target: mask) bool {
     }
 
     if (has_key != -1) {
-        const bit: mask = @as(mask, 1) << @intCast((@as(mask, @intCast(has_key)) + KEY_START));
+        const bit: mask = @as(mask, 1) << @intCast(has_key + KEY_START);
 
         if (current_mask & bit == 0)
             return false;
@@ -143,5 +143,84 @@ pub fn compare_mask(target: mask) bool {
         }
     }
     
-    return true;
+    return res;
+}
+
+test "voice state" {
+    const test_mask: mask = @intFromEnum(State.talk);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(State.quiet);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(State.talk);
+
+    try std.testing.expectEqual(true, compare_mask(test_mask));
+}
+
+test "mod key" {
+    const test_mask: mask = @intFromEnum(Mod.super) | @intFromEnum(Mod.meta);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(Mod.super);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(Mod.meta);
+
+    try std.testing.expectEqual(true, compare_mask(test_mask));
+}
+
+test "key" {
+    current_mask = 0;
+    const bit: mask = @as(mask, 1) << @intCast('B' - 'A' + KEY_START);
+    const test_mask: mask = bit;
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask = bit;
+
+    try std.testing.expectEqual(true, compare_mask(test_mask));
+}
+
+test "voice and mod key" {
+    current_mask = 0;
+    const test_mask: mask = @intFromEnum(State.talk) | @intFromEnum(Mod.super);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(State.talk) | @intFromEnum(State.quiet);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(Mod.super);
+
+    try std.testing.expectEqual(true, compare_mask(test_mask));
+}
+
+test "voice and key" {
+    current_mask = 0;
+    const bit: mask = @as(mask, 1) << @intCast('B' - 'A' + KEY_START);
+    const test_mask: mask = @intFromEnum(State.pause) | bit; 
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(State.pause);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= bit;
+
+    try std.testing.expectEqual(true, compare_mask(test_mask));
+}
+
+test "all together" {
+    current_mask = 0;
+    const bit: mask = @as(mask, 1) << @intCast('B' - 'A' + KEY_START);
+    const test_mask: mask = @intFromEnum(State.pause) | @intFromEnum(Mod.meta) | bit;
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(State.pause);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= @intFromEnum(Mod.meta);
+
+    try std.testing.expectEqual(false, compare_mask(test_mask));
+    current_mask |= bit;
+
+    try std.testing.expectEqual(true, compare_mask(test_mask));
 }

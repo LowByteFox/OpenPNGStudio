@@ -1,6 +1,5 @@
 const std = @import("std");
 const path = @import("core/path.zig");
-// const mask = @import("core/mask.zig");
 // const rl = @import("raylib");
 
 pub fn main() !void {
@@ -37,4 +36,8 @@ pub fn main() !void {
 
     //     rl.DrawText("Uwu! You created your first window!", 190, 200, 20, rl.LIGHTGRAY);
     // }
+}
+
+comptime {
+    _ = @import("core/mask.zig");
 }
