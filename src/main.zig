@@ -1,19 +1,8 @@
 const std = @import("std");
-const path = @import("core/path.zig");
+// const path = @import("core/path.zig");
 // const rl = @import("raylib");
 
 pub fn main() !void {
-    var dbg_alloc = std.heap.DebugAllocator(.{}).init;
-    defer _ = dbg_alloc.detectLeaks();
-    const allocator = dbg_alloc.allocator();
-
-    var pth = path.Path.init(allocator);
-    try pth.append_dir("home");
-    try pth.append_dir("jany");
-    try pth.append_file("Rose");
-
-    std.debug.print("{any}\n", .{try pth.stringify()});
-
     return;
     // const screenWidth = 800;
     // const screenHeight = 450;
@@ -40,4 +29,5 @@ pub fn main() !void {
 
 comptime {
     _ = @import("core/mask.zig");
+    _ = @import("core/path.zig");
 }
